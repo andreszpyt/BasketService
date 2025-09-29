@@ -3,6 +3,7 @@ package com.market.basketservice.services;
 import com.market.basketservice.clients.PlatziStoreClient;
 import com.market.basketservice.controllers.response.ProductResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,11 +15,13 @@ public class ProductService {
 
     private final PlatziStoreClient platziStoreClient;
 
+    @Cacheable(value = "Products")
     public List<ProductResponse> getAllProducts() {
         return platziStoreClient.getProducts();
     }
 
-    public ProductResponse getProductById(Long id) {
-        return platziStoreClient.getProduct(id);
+    @Cacheable(value = "Product", key = "productId")
+    public ProductResponse getProductById(Long productId) {
+        return platziStoreClient.getProduct(productId);
     }
 }
