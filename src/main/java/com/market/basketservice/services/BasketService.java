@@ -10,8 +10,10 @@ import com.market.basketservice.repositories.BasketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -25,24 +27,16 @@ public class BasketService {
     }
 
     public Basket getBasketById(String id) {
-        return basketRepository.findById(id).orElse(null);
+            return basketRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Basket not found"));
     }
+
     public Basket createBasket(BasketRequest basketRequest) {
 
         basketRepository.findBasketByClientAndStatus(basketRequest.client(), Status.OPEN)
                 .ifPresent(basket -> {throw new IllegalArgumentException("There is already an open basket");
     });
 
-        List<Product> products = new ArrayList<>();
-        basketRequest.products().forEach(product -> {
-            ProductResponse productResponse = productService.getProductById(product.id());
-            products.add(Product.builder()
-                    .id(productResponse.id())
-                    .title(productResponse.title())
-                    .price(productResponse.price())
-                    .quantity(product.quantity())
-                    .build());
-        });
+        List<Product> products = productsMapper(basketRequest.products());
 
         Basket basket = Basket.builder()
                 .client(basketRequest.client())
@@ -56,19 +50,15 @@ public class BasketService {
     }
 
     public Basket updateBasket(String id, BasketRequest basketRequest) {
-        List<Product> products = new ArrayList<>();
-
-        basketRequest.products().forEach(product -> {
-            ProductResponse productResponse = productService.getProductById(product.id());
-            products.add(Product.builder()
-                    .id(productResponse.id())
-                    .title(productResponse.title())
-                    .price(productResponse.price())
-                    .quantity(product.quantity())
-                    .build());
-        });
 
         Basket basket = getBasketById(id);
+
+        if(basket == null) {
+            throw new IllegalArgumentException("Basket not found");
+        }
+
+        List<Product> products = productsMapper(basketRequest.products());
+
         basket.setProducts(products);
         basket.calculateTotalPrice();
         return basketRepository.save(basket);
@@ -79,13 +69,26 @@ public class BasketService {
     }
 
     public List<Product> productsMapper(List<ProductRequest> productRequest){
-        List<Long> id = new ArrayList<>();
-        productRequest.forEach(product -> {id.add(product.id());
-        });
-        List<ProductResponse> productsResponse = productService.getAllProductsByIds(id);
-        
+        List<Long> ids = productRequest.stream()
+                .map(ProductRequest::id)
+                .toList();
 
+        List<ProductResponse> productsResponse = productService.getAllProductsByIds(ids);
+
+        Map<Long, ProductResponse> productResponseMap = productsResponse.stream()
+                .collect(Collectors.toMap(ProductResponse::id, Function.identity()));
+
+        return productRequest.stream()
+                .filter(request -> productResponseMap.containsKey(request.id()))
+                .map(request -> {
+                     ProductResponse response = productResponseMap.get(request.id());
+                     return Product.builder()
+                            .id(response.id())
+                            .title(response.title())
+                            .price(response.price())
+                            .quantity(request.quantity()) // Usa a quantidade do request
+                            .build();
+                })
+                .toList();
     }
-
-
 }

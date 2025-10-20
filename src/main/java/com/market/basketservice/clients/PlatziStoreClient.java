@@ -4,6 +4,7 @@ import com.market.basketservice.controllers.response.ProductResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -16,6 +17,6 @@ public interface PlatziStoreClient {
     @GetMapping("/products/{id}")
     ProductResponse getProduct(@PathVariable Long id);
 
-    List<ProductResponse> getProductsByIds(List<Long> productIds);
-
+    @GetMapping("/products")
+    List<ProductResponse> getProductsByIds(@RequestParam("ids") List<Long> productIds);
 }
