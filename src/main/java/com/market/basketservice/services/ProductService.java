@@ -27,4 +27,10 @@ public class ProductService {
         log.info("getProductById : {}", productId);
         return platziStoreClient.getProduct(productId);
     }
+
+    @Cacheable(value = "Products")
+    public List<ProductResponse> getAllProductsByIds(List<Long> productIds) {
+        log.info("getAllProductsByIds : {}", productIds);
+        return platziStoreClient.getProductsByIds(productIds);
+    }
 }

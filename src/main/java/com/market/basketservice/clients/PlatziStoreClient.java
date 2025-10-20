@@ -16,4 +16,6 @@ public interface PlatziStoreClient {
     @GetMapping("/products/{id}")
     ProductResponse getProduct(@PathVariable Long id);
 
+    List<ProductResponse> getProductsByIds(List<Long> productIds);
+
 }
