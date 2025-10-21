@@ -7,6 +7,7 @@ import com.market.basketservice.controllers.response.ProductResponse;
 import com.market.basketservice.entities.Basket;
 import com.market.basketservice.entities.Product;
 import com.market.basketservice.entities.Status;
+import com.market.basketservice.exceptions.DataNotFoundException;
 import com.market.basketservice.repositories.BasketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class BasketService {
     }
 
     public Basket getBasketById(String id) {
-            return basketRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Basket not found"));
+            return basketRepository.findById(id).orElseThrow(() -> new DataNotFoundException("Basket not found"));
     }
 
 
@@ -56,7 +57,7 @@ public class BasketService {
         Basket basket = getBasketById(id);
 
         if(basket == null) {
-            throw new IllegalArgumentException("Basket not found");
+            throw new DataNotFoundException("Basket not found");
         }
 
         List<Product> products = productsMapper(basketRequest.products());
@@ -88,7 +89,7 @@ public class BasketService {
                             .id(response.id())
                             .title(response.title())
                             .price(response.price())
-                            .quantity(request.quantity()) // Usa a quantidade do request
+                            .quantity(request.quantity())
                             .build();
                 })
                 .toList();
