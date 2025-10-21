@@ -1,6 +1,7 @@
 package com.market.basketservice.services;
 
 import com.market.basketservice.controllers.request.BasketRequest;
+import com.market.basketservice.controllers.request.PaymentRequest;
 import com.market.basketservice.controllers.request.ProductRequest;
 import com.market.basketservice.controllers.response.ProductResponse;
 import com.market.basketservice.entities.Basket;
@@ -29,6 +30,7 @@ public class BasketService {
     public Basket getBasketById(String id) {
             return basketRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Basket not found"));
     }
+
 
     public Basket createBasket(BasketRequest basketRequest) {
 
@@ -90,5 +92,12 @@ public class BasketService {
                             .build();
                 })
                 .toList();
+    }
+
+    public Basket payBasket(String id, PaymentRequest paymentRequest) {
+        Basket basket = getBasketById(id);
+        basket.setStatus(Status.SOLD);
+        basket.setPaymentMethod(paymentRequest.paymentMethod());
+        return basketRepository.save(basket);
     }
 }

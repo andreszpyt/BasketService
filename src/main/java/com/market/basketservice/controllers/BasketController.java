@@ -1,6 +1,7 @@
 package com.market.basketservice.controllers;
 
 import com.market.basketservice.controllers.request.BasketRequest;
+import com.market.basketservice.controllers.request.PaymentRequest;
 import com.market.basketservice.entities.Basket;
 import com.market.basketservice.services.BasketService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,11 @@ public class BasketController {
     @PutMapping("{id}")
     public ResponseEntity<Basket> updateBasket(@PathVariable String id, @RequestBody BasketRequest basketRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(basketService.updateBasket(id, basketRequest));
+    }
+
+    @PutMapping("/pay/{id}")
+    public ResponseEntity<Basket> payBasket(@PathVariable String id, @RequestBody PaymentRequest paymentRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(basketService.payBasket(id, paymentRequest));
     }
 
     @DeleteMapping("/{id}")
